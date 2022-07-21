@@ -1,4 +1,4 @@
-const generateCommit = (commitMessage: string, commitDate: Date) => {
+const generateCommit = (commitMessage: string, commitDate: string) => {
     const date = new Date(commitDate)
 
     return [

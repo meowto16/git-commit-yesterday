@@ -1,62 +1,68 @@
-import React, {useEffect, useState} from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useId } from 'react'
 import generateCommit from "./utils/generateCommit";
+
+import logo from './logo.svg';
+
+import './App.css';
 
 const MAX_DATE = new Date().toISOString().split('T')[0]
 
 function App() {
-  const [commitMessage, setCommitMessage] = useState('')
-  const [commitDate, setCommitDate] = useState<Date>(new Date())
-  const [result, setResult] = useState(() => generateCommit(commitMessage, commitDate))
+  const formId = useId()
+  const [result, setResult] = useState('')
 
-  const handleChangeCommitMessage: React.ChangeEventHandler<HTMLInputElement> = (event) => {
-      setCommitMessage(event.target.value)
+  const handleBlur: React.FocusEventHandler = () => {
+    const form = document.forms[formId as any]
+    const message: string = form.message.value
+    const date: string = form.date.value
+
+    setResult(() => {
+      if (message && date) return generateCommit(message, date)
+      return ''
+    })
   }
-
-  const handleChangeCommitDate: React.ChangeEventHandler<HTMLInputElement> = (event) => {
-      setCommitDate(event.target.value ? new Date(event.target.value) : new Date())
-  }
-
-  useEffect(() => {
-      setResult(() => generateCommit(commitMessage, commitDate))
-  }, [commitMessage, commitDate])
 
   return (
     <div className="app">
       <header className="app__header">
         <h1>Commit for other day!</h1>
         <div>
+          <form name={formId} onSubmit={(e) => e.preventDefault()}>
             <fieldset className="fieldset">
-                <legend className="fieldset__legend">Create your commit ssh command</legend>
+              <legend className="fieldset__legend">Create your commit ssh command</legend>
+              <div className="fieldset__item">
+                <label className="fieldset__label" htmlFor="commit-message">1. Commit message</label>
+                <input id="commit-message"
+                       name="message"
+                       className="fieldset__input"
+                       type="text"
+                       placeholder="Enter commit message"
+                       onBlur={handleBlur}
+                />
+              </div>
 
-                <div className="fieldset__item">
-                    <label className="fieldset__label" htmlFor="commit-message">1. Commit message</label>
-                    <input id="commit-message"
-                           className="fieldset__input"
-                           type="text"
-                           value={commitMessage}
-                           onChange={handleChangeCommitMessage}
-                           placeholder="Enter commit message"
-                    />
-                </div>
+              <div className="fieldset__item">
+                <label className="fieldset__label" htmlFor="commit-date">2. Date you want to commit</label>
+                <input id="commit-date"
+                       name="date"
+                       className="fieldset__input"
+                       type="date"
+                       onBlur={handleBlur}
+                       max={MAX_DATE}
+                />
+              </div>
 
-                <div className="fieldset__item">
-                    <label className="fieldset__label" htmlFor="commit-date">2. Date you want to commit</label>
-                    <input id="commit-date"
-                           className="fieldset__input"
-                           type="date"
-                           value={commitDate.toISOString().split('T')[0]}
-                           onChange={handleChangeCommitDate}
-                           max={MAX_DATE}
-                    />
-                </div>
-
-                <div className="fieldset__result">
-                    <label className="fieldset__label">3. Result:</label>
-                    <textarea className="fieldset__input fieldset__textarea" value={result} readOnly />
-                </div>
+              <div className="fieldset__result">
+                <label className="fieldset__label">3. Result:</label>
+                <textarea
+                  className="fieldset__input fieldset__textarea"
+                  value={result}
+                  readOnly
+                  onFocus={(e) => e.target.select()}
+                />
+              </div>
             </fieldset>
+          </form>
         </div>
       </header>
       <div className="app__copyright">
